@@ -1,0 +1,77 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Todoist Task Adder
+  license:
+    name: MIT
+servers:
+  - url: https://api.todoist.com/rest/v2
+
+paths:
+  /tasks:
+    post:
+      summary: Add a new task to Todoist
+      operationId: addTask
+      x-openai-isConsequential: false  # No user approval needed for this operation
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                projectId:
+                  type: string
+                dateString:
+                  type: string
+                priority:
+                  type: integer
+                labels:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Task successfully added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        # Other task response fields...
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+security:
+  - TodoistAuth: []
+
+securitySchemes:
+  TodoistAuth:
+    type: https
+    scheme: bearer
+    bearerFormat: JWT

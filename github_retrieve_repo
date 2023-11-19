@@ -59,7 +59,7 @@ paths:
   /repos/{owner}/{repo}/git/trees/{sha}:
     get:
       description: Get a filetree of a repository's branch.
-      operationId: GetRepositoryTree
+      operationId: GetRepositoryFileTree
       parameters:
         - name: owner
           in: path
@@ -76,9 +76,10 @@ paths:
         - name: sha
           in: path
           description: The SHA of the commit. Typically, this is the latest commit SHA of the main branch.
-          required: true
+          required: false
           schema:
             type: string
+            default: main
       headers:
         Accept:
           description: Media type to accept for the request.

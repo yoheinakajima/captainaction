@@ -1,0 +1,218 @@
+# Article on how to integrate the github repo:
+# https://huurmatcher.nl/tech-blog/integrating-github-repositories-with-custom-gpts
+
+openapi: "3.1.0"
+info:
+  title: Get repository contents Github
+  description: Retrieves repo content from github.
+  version: 1.0.0
+servers:
+  - url: https://api.github.com
+
+paths:
+  /repos/{owner}/{repo}/contents/{path}:
+    get:
+      description: Get the contents of a file or directory in a Github repository.
+      operationId: GetRepositoryContent
+      parameters:
+        - name: owner
+          in: path
+          description: The owner of the github repo.
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          description: The github repository name.
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: path
+          description: Path parameter, starting at the root of the project.
+          required: true
+          schema:
+            type: string
+      headers:
+        Accept:
+          description: Media type to accept for the request.
+          required: true
+          schema:
+            type: string
+            default: application/vnd.github+json
+        X-GitHub-Api-Version:
+          description: GitHub API version.
+          required: true
+          schema:
+            type: string
+            default: 2022-11-28
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.github+json:
+              schema:
+                $ref: "#/components/schemas/ContentTree"
+        '302':
+          description: Found
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+  /repos/{owner}/{repo}/git/trees/{sha}:
+    get:
+      description: Get a filetree of a repository's branch.
+      operationId: GetRepositoryFileTree
+      parameters:
+        - name: owner
+          in: path
+          description: The owner of the github repo.
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          description: The github repository name.
+          required: true
+          schema:
+            type: string
+        - name: sha
+          in: path
+          description: The SHA of the commit. Typically, this is the latest commit SHA of the main branch.
+          required: false
+          schema:
+            type: string
+            default: main
+      headers:
+        Accept:
+          description: Media type to accept for the request.
+          required: true
+          schema:
+            type: string
+            default: application/vnd.github+json
+        X-GitHub-Api-Version:
+          description: GitHub API version.
+          required: true
+          schema:
+            type: string
+            default: 2022-11-28
+      responses:
+        '200':
+          description: Successful response with the content details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentTree"
+        '403':
+          description: Forbidden - The request is not authorized. Check your permissions.
+        '404':
+          description: Not Found - The specified resource does not exist.
+  /repos/{owner}/{repo}/branches/main:
+    get:
+      description: Get the latest SHA of the main branch.
+      operationId: GetSHAMain
+      parameters:
+        - name: owner
+          in: path
+          description: The owner of the github repo.
+          required: true
+          schema:
+            type: string
+        - name: repo
+          in: path
+          description: The github repository name.
+          required: true
+          schema:
+            type: string
+        - name: sha
+          in: path
+          description: Path parameter, most of the times we need the latest sha of the main branch.
+          required: true
+          schema:
+            type: string
+      headers:
+        Accept:
+          description: Media type to accept for the request.
+          required: true
+          schema:
+            type: string
+            default: application/vnd.github+json
+        X-GitHub-Api-Version:
+          description: GitHub API version.
+          required: true
+          schema:
+            type: string
+            default: 2022-11-28
+      responses:
+        '200':
+          description: OK
+        '302':
+          description: Found
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+components:
+  schemas:
+    ContentTree:
+      type: object
+      required:
+        - type
+        - size
+        - name
+        - path
+        - sha
+        - url
+        - _links
+      properties:
+        type: 
+          type: string
+          description: Type of the content (e.g., file, dir).
+        size: 
+          type: integer
+          description: Size of the content in bytes.
+        name: 
+          type: string
+          description: Name of the file or directory.
+        path: 
+          type: string
+          description: Full path to the content.
+        sha: 
+          type: string
+        url: 
+          type: string
+          format: uri
+        git_url:
+          type: string
+          format: uri
+          nullable: true
+        html_url:
+          type: string
+          format: uri
+          nullable: true
+        download_url:
+          type: string
+          format: uri
+          nullable: true
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentTree"
+        _links:
+          type: object
+          required:
+            - git
+            - html
+            - self
+          properties:
+            git:
+              type: string
+              format: uri
+              nullable: true
+            html:
+              type: string
+              format: uri
+              nullable: true
+            self:
+              type: string
+              format: uri

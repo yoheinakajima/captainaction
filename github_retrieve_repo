@@ -1,3 +1,6 @@
+# Article on how to integrate the github repo:
+# https://huurmatcher.nl/tech-blog/integrating-github-repositories-with-custom-gpts
+
 openapi: "3.1.0"
 info:
   title: Get repository contents Github
